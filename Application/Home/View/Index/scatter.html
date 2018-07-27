@@ -1,0 +1,401 @@
+<layout name="Public/layout" />
+<div class="row">
+  <div class="col-sm-9">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> 北京房价总体分布图
+      </div>
+      <div class="panel panel-body">
+        <div id="main" style="width: 100%;height:700px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-search fa-fw"></i> 关键字定位
+      </div>
+      <div class="panel panel-body">
+          <div class="input-group">
+            <input type="text" id="keyword" name="keyword" class="form-control" placeholder="关键字" autocomplete="off"/>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-search fa-fw"></i> 基本筛选
+      </div>
+      <div class="panel panel-body">
+
+        <form class="form">
+          <div class="form-group">
+            <label>每平米价格(万元):</label>
+            <input id="price" name='price' data-slider-id='priceSlider' type="text" data-slider-min="0" data-slider-max="15" data-slider-step="1" data-slider-value="0"/>
+          </div>
+
+          <div class="form-group">
+            <label>面积大小(平米):</label>
+            <input id="area" name="area" data-slider-id='areaSlider' type="text" data-slider-min="0" data-slider-max="200" data-slider-step="50" data-slider-value="0"/>
+          </div>
+          
+          <div class="form-group">
+            <label>距市中心距离(km): </label>
+            <input id="distance" name="distance" data-slider-id='distanceSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="5" data-slider-value="0"/>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<style type='text/css'>
+.slider-selection {
+  background: #BABABA;
+}
+.slider-handle {
+  background: #3C8DBC;
+}
+</style>
+
+<script>
+var name2id = {};
+var xys = [];
+var xy = [116.404, 39.915];
+var zoom = 11;
+$("#keyword").typeahead({
+    updater: function(item) {
+      var idx = name2id[item];
+      xy[1] = xys[idx].lat;
+      xy[0] = xys[idx].lng;
+      zoom = 14;
+      var price = document.getElementById("price").value;
+      var area = document.getElementById("area").value;
+      var distance = document.getElementById("distance").value;
+      draw(price,area,distance);
+      return item;
+    },
+    source: function(query, process) {
+        //query是输入的值
+        $.ajax({
+            dataType: "jsonp",
+            url: "http://api.map.baidu.com/place/v2/suggestion",
+            data: "query=" + query + "&region=北京市&city_limit=true&location=39.915132,116.403972&output=json&ak=dASz7ubuSpHidP1oQWKuAK3q",
+            jsonp:"callback",
+            success: function(data) {
+                var names = [];
+                var places = [];
+                $.each(data.result,function(index,item){
+                    if(typeof(item["location"]) != "undefined")
+                    {
+                        places.push(item);
+                    }
+                });
+                $.each(places,function(index,item){
+                    name2id[item.name]=index;
+                    names.push(item.name);
+                    var obj = Object();
+                    obj.lat = item["location"]["lat"];
+                    obj.lng = item["location"]["lng"];
+                    xys.push(obj)
+                });
+                process(names);
+            },
+            error: function() {
+                alert('error');
+            },
+            timeout: function() {
+                alert('time out');
+            }
+        });
+    },
+    items: 10,
+    delay: 1000
+});
+
+var myChart = echarts.init(document.getElementById('main'));
+draw();
+
+$('#price').bootstrapSlider({
+    formatter: function(value) {
+        return value + ' 万';
+    }
+}).on('slideStop',
+function(ev) {
+    var price = ev.value;
+    var area = document.getElementById("area").value;
+    var distance = document.getElementById("distance").value;
+    draw(price, area, distance);
+});
+
+$('#area').bootstrapSlider({
+    formatter: function(value) {
+        return value + " 平米";
+    }
+}).on('slideStop',
+function(ev) {
+    var price = document.getElementById("price").value;
+    var area = ev.value;
+    var distance = document.getElementById("distance").value;
+    draw(price, area, distance);
+});
+
+$('#distance').bootstrapSlider({
+    formatter: function(value) {
+        return value + " km";
+    }
+}).on('slideStop',
+function(ev) {
+    var price = document.getElementById("price").value;;
+    var area = document.getElementById("area").value;
+    var distance = ev.value;
+    draw(price, area, distance);
+});
+
+/*$('form').submit(function () {
+    var params = $(this).serializeArray();
+    var price = params[0].value;
+    var area = params[1].value;
+    var distance = params[5].value;
+    draw(price, area, distance);
+    return false;
+  });*/
+var marker=null;
+function draw(price, area, distance) {
+    myChart.showLoading();
+    $.ajax({
+        type: "GET",
+        url: "__ROOT__/Home/Index/get_all",
+        data: "price=" + price + "&area=" + area + "&distance=" + distance,
+        dataType: 'json',
+        success: function(data) {
+            myChart.hideLoading();
+            var house_data = [];
+            $.each(data,
+            function(index, house) {
+                var each_house = [];
+                each_house.push(house.longitude, house.latitude, house.id, Math.round(house.unit_price / 10000 * 100) / 100, house.community, house.housearea, house.style, house.floor, house.area, Math.round(house.distance / 10000 * 100) / 100);
+                house_data.push(each_house);
+            });
+
+            myChart.on('click',
+            function(params) {
+                window.open("__ROOT__/Home/House/detail/id/" + encodeURIComponent(params.value[2]));
+                //        window.location.href = "http://stackoverflow.com";
+            });
+
+            myChart.setOption({
+                backgroundColor: '#404a59',
+                tooltip: {
+                    padding: 10,
+                    backgroundColor: '#222',
+                    borderColor: '#777',
+                    borderWidth: 1,
+                    trigger: 'item',
+                    formatter: function(obj) {
+                        var value = obj.value;
+                        return '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 18px;padding-bottom: 7px;margin-bottom: 7px">' + value[4] + ': ' + value[3] + "万" + '</div>' + '面积: ' + value[5] + '平' + '<br>' + '房型：' + value[6] + '<br>' + '楼层：' + value[7] + '<br>' + '地址：' + value[8] + '<br>' + '距离天安门：' + value[9] + 'km' + '<br>';
+
+                    }
+                },
+                legend: {
+                    orient: 'vertical',
+                    y: 'bottom',
+                    x: 'right',
+                    data: ['价格'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                visualMap: {
+                    left: 'right',
+                    bottom: '0%',
+                    min: 0,
+                    max: 16,
+                    dimension: 3,
+                    precision: 0.1,
+                    text: ['每平方米/万'],
+                    textGap: 20,
+                    calculable: true,
+                    inRange: {
+                        color: ['#50a3ba', '#eac736', 'red']
+                    },
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+
+                bmap:{ center: xy,
+                       zoom: zoom,
+                       roam: true,
+                       mapStyle: {
+                        'styleJson': [{
+                            'featureType': 'water',
+                            'elementType': 'all',
+                            'stylers': {
+                                'color': '#031628'
+                            }
+                        },
+                        {
+                            'featureType': 'land',
+                            'elementType': 'geometry',
+                            'stylers': {
+                                'color': '#000102'
+                            }
+                        },
+                        {
+                            'featureType': 'highway',
+                            'elementType': 'all',
+                            'stylers': {
+                                'visibility': 'off'
+                            }
+                        },
+                        {
+                            'featureType': 'arterial',
+                            'elementType': 'geometry.fill',
+                            'stylers': {
+                                'color': '#000000'
+                            }
+                        },
+                        {
+                            'featureType': 'arterial',
+                            'elementType': 'geometry.stroke',
+                            'stylers': {
+                                'color': '#0b3d51'
+                            }
+                        },
+                        {
+                            'featureType': 'local',
+                            'elementType': 'geometry',
+                            'stylers': {
+                                'color': '#000000'
+                            }
+                        },
+                        {
+                            'featureType': 'railway',
+                            'elementType': 'geometry.fill',
+                            'stylers': {
+                                'color': '#000000'
+                            }
+                        },
+                        {
+                            'featureType': 'railway',
+                            'elementType': 'geometry.stroke',
+                            'stylers': {
+                                'color': '#08304b'
+                            }
+                        },
+                        {
+                            'featureType': 'subway',
+                            'elementType': 'geometry',
+                            'stylers': {
+                                'lightness': -70
+                            }
+                        },
+                        {
+                            'featureType': 'building',
+                            'elementType': 'geometry.fill',
+                            'stylers': {
+                                'color': '#000000'
+                            }
+                        },
+                        {
+                            'featureType': 'all',
+                            'elementType': 'labels.text.fill',
+                            'stylers': {
+                                'color': '#857f7f'
+                            }
+                        },
+                        {
+                            'featureType': 'all',
+                            'elementType': 'labels.text.stroke',
+                            'stylers': {
+                                'color': '#000000'
+                            }
+                        },
+                        {
+                            'featureType': 'building',
+                            'elementType': 'geometry',
+                            'stylers': {
+                                'color': '#022338'
+                            }
+                        },
+                        {
+                            'featureType': 'green',
+                            'elementType': 'geometry',
+                            'stylers': {
+                                'color': '#062032'
+                            }
+                        },
+                        {
+                            'featureType': 'boundary',
+                            'elementType': 'all',
+                            'stylers': {
+                                'color': '#465b6c'
+                            }
+                        },
+                        {
+                            'featureType': 'manmade',
+                            'elementType': 'all',
+                            'stylers': {
+                                'color': '#022338'
+                            }
+                        },
+                        {
+                            'featureType': 'label',
+                            'elementType': 'all',
+                            'stylers': {
+                                'visibility': 'off'
+                            }
+                        }]
+                    }
+                },
+                series: [{
+                    name: 'house',
+                    type: 'scatter',
+                    coordinateSystem: 'bmap',
+                    data: house_data,
+                    symbolSize: 12,
+                    pointSize: 3,
+                    blurSize: 4,
+                    label: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    itemStyle: {
+                        emphasis: {
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        },
+                        normal: {
+                            opacity: 0.9
+                        }
+                    }
+                }]
+            });
+
+
+            var bmap = myChart.getModel().getComponent('bmap').getBMap();
+            var point = new BMap.Point(xy[0],xy[1]);
+            var myIcon = new BMap.Icon("__PUBLIC__/icon/markers.png", new BMap.Size(23, 25), {  
+                        offset: new BMap.Size(10, 25), // 指定定位位置  
+                        imageOffset: new BMap.Size(0, 0 - 10 * 25) // 设置图片偏移  
+                    });  
+            if(marker!=null)
+               bmap.removeOverlay(marker);
+            marker = new BMap.Marker(point,{icon:myIcon});
+
+            bmap.addOverlay(marker);
+            marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+        },
+        error: function() {
+            alert('error')
+        },
+        timeout: function() {
+            alert('time out')
+        }
+    });
+}
+</script>

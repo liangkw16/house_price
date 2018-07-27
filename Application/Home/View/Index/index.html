@@ -1,0 +1,178 @@
+<layout name="Public/layout" />
+<div class="row">
+  <div class="col-lg-5">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i>北京房价分区显示
+      </div>
+      <div class="panel-body">
+        <div id="map" style="width: 100%;height: 600px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> 北京房价分区统计
+      </div>
+      <div class="panel-body">
+        <div id="histogram" style="width: 100%;height: 600px"></div>
+      </div>
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+
+  //解析数据
+  var str = '<?php echo json_encode($districts);?>'
+  var list = eval(decodeURIComponent(str));
+  var prices = new Array();
+  var nums = new Array();
+  var areas = new Array();
+  var names = new Array();
+  for(var i=0;i<list.length;i++)
+  {
+    var price = new Object();
+    var num = new Object();
+    var area = new Object();
+    price['name']=list[i]['name'];
+    price['value']=Math.round(list[i]['average_price']/10000.0*100)/100;
+    num['name'] = list[i]['name'];
+    num['value']=list[i]['total_num'];
+    area['name']=list[i]['name'];
+    area['value']=Math.round(list[i]['total_area']/10000.0*100)/100;
+    names[i] = list[i]['name'];
+    prices[i] = price;
+    nums[i] = num;
+    areas[i] = area;
+  }
+
+  //均价可视化
+  var myChart = echarts.init(document.getElementById('map'));
+  myChart.showLoading();
+  $.get('__PUBLIC__/beijing.json', function (geoJson) {
+
+    myChart.hideLoading();
+
+    echarts.registerMap('beijing', geoJson);
+
+    myChart.setOption(option = {
+        tooltip: {
+            trigger: 'item',
+            formatter: '{b}<br/>{c} 万元'
+        },
+        visualMap: {
+            min: 0,
+            max: 12,
+            text:['High','Low'],
+            realtime: false,
+            calculable: true,
+            inRange: {
+                color: ['lightskyblue','yellow', 'orangered']
+            }
+        },
+        series: [
+            {
+                name: '北京分区平均房价',
+                type: 'map',
+                mapType: 'beijing', // 自定义扩展图表类型
+                itemStyle:{
+                    normal:{label:{show:false}},
+                    emphasis:{label:{show:false}}
+                },
+                data:prices,
+                // 自定义名称映射
+                nameMap: {
+                    '东城区': '东城',
+                    '石景山区': '石景山',
+                    '西城区': '西城',
+                    '海淀区': '海淀',
+                    '丰台区': '丰台',
+                    '朝阳区': '朝阳',
+                    '门头沟区': '门头沟',
+                    '房山区': '房山',
+                    '通州区': '通州',
+                    '顺义区': '顺义',
+                    '昌平区': '昌平',
+                    '大兴区': '大兴',
+                    '平谷区': '平谷',
+                    '怀柔区': '怀柔',
+                    '密云区': '密云',
+                    '延庆区': '延庆',
+                }
+            }
+        ]
+       });
+    });
+
+  //房价总数和总面积可视化
+  var Histogram = echarts.init(document.getElementById('histogram'));
+  var histogram_colors = ['#d14a61', '#5793f3'];
+    Histogram.setOption({
+        color: histogram_colors,
+        tooltip: {
+          trigger: 'axis'
+        },
+        grid: {
+          right: '20%'
+        },
+        legend: {
+          data: ['房子总数', '房子总面积']
+        },
+        xAxis: [
+          {
+            type: 'category',
+            axisTick: {
+              alignWithLabel: true
+            },
+            data: names
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value',
+            name: '房子总数',
+            min: 0,
+            max: 7000,
+            position: 'left',
+            axisLine: {
+              lineStyle: {
+                color: histogram_colors[0]
+              }
+            },
+            axisLabel: {
+              formatter: '{value}'
+            }
+          },
+          {
+            type: 'value',
+            name: '房子总面积',
+            min: 0,
+            max: 80,
+            position: 'right',
+            axisLine: {
+              lineStyle: {
+                color: histogram_colors[1]
+              }
+            },
+            axisLabel: {
+              formatter: '{value} 万平米'
+            }
+          }
+        ],
+        series: [
+          {
+            name: '房子总数',
+            type: 'bar',
+            data: nums
+          },
+          {
+            name: '房子总面积',
+            type: 'line',
+            yAxisIndex: 1,
+            data: areas
+          }
+        ]
+      }
+  );
+</script>

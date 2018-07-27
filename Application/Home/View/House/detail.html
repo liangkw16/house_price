@@ -1,0 +1,483 @@
+<layout name="Public/layout" />
+<div class="row">
+  <div class="col-lg-12">
+    <h2 class="page-header">{$house.community}</h2>
+  </div>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <i class="fa fa-info-circle fa-fw"></i> 基本信息
+  </div>
+  <div class="panel-body">
+    <div class="row">
+      <div class=" col-md-12 col-lg-12 ">
+        <table class="table">
+          <tbody>
+          <tr>
+            <td style="width: 15%">小区名:</td>
+            <td>{$house.community}</td>
+            <td style="width: 15%">面积:</td>
+            <td><?php echo sprintf("%.2f",$house['housearea']);?>平方米</td>
+          </tr>
+          <tr>
+            <td>房型:</td>
+            <td>{$house.style}</td>
+            <td>楼层:</td>
+            <td>{$house.floor}</td>
+          </tr>
+          <tr>
+            <td>地址:</td>
+            <td>{$house.area}</td>
+            <td>距离市中心:</td>
+            <td><?php echo sprintf("%.2f",$house['distance']/1000.0);?>千米</td>
+          </tr>--
+          <tr>
+            <td>每平米:</td>
+            <td><?php echo sprintf("%.2f",$house['unit_price']/10000.0);?>万</td>
+            <td>总价:</td>
+            <td><?php echo sprintf("%.2f",$house['unit_price']*$house['housearea']/10000.0);?>万</td>
+          </tr>
+          <tr>
+            <td>数据来源:</td>
+            <td><a href="{$house.url}">链家网</a></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <h2 class="page-header">周边基础设施</h2>
+  </div>
+</div>
+
+<!--周边详情-->
+<div class="row">
+<!--地铁-->
+<div class="col-lg-2 col-md-6">
+  <div id="map-detail" class="panel panel-info">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-xs-3">
+          <i class="fa fa-subway fa-4x"></i>
+        </div>
+        <div class="col-xs-9 text-right">
+          <div class="huge">{$house.subway_num}</div>
+          <div>地铁</div>
+        </div>
+      </div>
+    </div>
+    <a path="__ROOT__/Home/Subway/index/id/{$house.id}" href="#">
+      <div class="panel-footer">
+        <span class="pull-left">View Details</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+</div>
+  <!--公交-->
+  <div class="col-lg-2 col-md-6">
+    <div id="map-detail" class="panel panel-primary">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-xs-3">
+          <i class="fa fa-bus fa-4x"></i>
+        </div>
+        <div class="col-xs-9 text-right">
+          <div class="huge">{$house.bus_num}</div>
+          <div>公交</div>
+        </div>
+      </div>
+    </div>
+    <a path="__ROOT__/Home/Bus/index/id/{$house.id}" href="#">
+      <div class="panel-footer">
+        <span class="pull-left">View Details</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+ </div>
+ <!--学校-->
+<div class="col-lg-2 col-md-6">
+  <div id="map-detail" class="panel panel-warning">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-xs-3">
+          <i class="fa fa-university fa-4x"></i>
+        </div>
+        <div class="col-xs-9 text-right">
+          <div class="huge">{$house.school_num}</div>
+          <div>学校</div>
+        </div>
+      </div>
+    </div>
+    <a path="__ROOT__/Home/School/index/id/{$house.id}" href="#">
+      <div class="panel-footer">
+        <span class="pull-left">View Details</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+</div>
+<!--医院-->
+<div class="col-lg-2 col-md-6">
+  <div id="map-detail" class="panel panel-danger">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-xs-3">
+          <i class="fa fa-heart fa-4x"></i>
+        </div>
+        <div class="col-xs-9 text-right">
+          <div class="huge">{$house.hospital_num}</div>
+          <div>医院</div>
+        </div>
+      </div>
+    </div>
+    <a path="__ROOT__/Home/Hospital/index/id/{$house.id}" href="#">
+      <div class="panel-footer">
+        <span class="pull-left">View Details</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+</div>
+<!--写字楼-->
+<div class="col-lg-2 col-md-6">
+  <div id="map-detail" class="panel panel-success">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-xs-3">
+          <i class="fa fa-building fa-4x"></i>
+        </div>
+        <div class="col-xs-9 text-right">
+          <div class="huge">{$house.work_num}</div>
+          <div>写字楼</div>
+        </div>
+      </div>
+    </div>
+    <a path="__ROOT__/Home/Work/index/id/{$house.id}" href="#">
+      <div class="panel-footer">
+        <span class="pull-left">View Details</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!--购物-->
+<div class="col-lg-2 col-md-6">
+  <div id="map-detail" class="panel panel-default">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-xs-3">
+          <i class="fa fa-shopping-cart fa-4x"></i>
+        </div>
+        <div class="col-xs-9 text-right">
+          <div class="huge">{$house.shop_num}</div>
+          <div>购物</div>
+        </div>
+      </div>
+    </div>
+    <a path="__ROOT__/Home/Shop/index/id/{$house.id}" href="#">
+      <div class="panel-footer">
+        <span class="pull-left">View Details</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+</div>
+</div>
+<!--周边详情结束-->
+<div class="row">
+  <div class="col-lg-8">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> 直方图
+      </div>
+      <div class="panel-body">
+        <div id="histogram" style="width: 100%;height: 400px"></div>
+      </div>
+    </div>
+    <div id="nav-scroll">
+      <div id="map-detail" class="panel panel-default">
+        <div class="panel-heading">
+          <i class="fa fa-bar-chart-o fa-fw"></i> 地图信息
+          <div class="pull-right">
+            <a href="#" class="btn btn-primary btn-xs" path="__ROOT__/Home/Subway/index/id/{$house.id}" role="button">地铁</a>
+            <a href="#" class="btn btn-primary btn-xs" path="__ROOT__/Home/Bus/index/id/{$house.id}" role="button">公交</a>
+            <a href="#" class="btn btn-success btn-xs" path="__ROOT__/Home/School/index/id/{$house.id}" role="button">学校</a>
+            <a href="#" class="btn btn-info btn-xs" path="__ROOT__/Home/Hospital/index/id/{$house.id}" role="button">写字楼</a>
+            <a href="#" class="btn btn-danger btn-xs" path="__ROOT__/Home/Work/index/id/{$house.id}" role="button">医院</a>
+            <a href="#" class="btn btn-warning btn-xs" path="__ROOT__/Home/Shop/index/id/{$house.id}" role="button">购物</a>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="l-map" style="height: 400px;width: 100%">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-bell fa-fw"></i>饼状图
+      </div>
+      <div class="panel-body">
+        <div id="pie_chart" style="width: 100%;height: 400px"></div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <i class="fa fa-bell fa-fw"></i>雷达图
+      </div>
+      <div class="panel-body">
+        <div id="radar_chart" style="width: 100%;height: 400px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  //解析数据
+  var house = JSON.parse('<?php echo json_encode($house);?>'); 
+  var subways =JSON.parse('<?php echo json_encode($subways);?>');
+  var buses =JSON.parse('<?php echo json_encode($buses);?>');
+  var schools =JSON.parse('<?php echo json_encode($schools);?>');
+  var hospitals =JSON.parse('<?php echo json_encode($hospitals);?>');
+  var works =JSON.parse('<?php echo json_encode($works);?>');
+  var shops =JSON.parse('<?php echo json_encode($shops);?>');
+  var distances = JSON.parse('<?php echo json_encode($distances);?>');
+
+  var pie_chart = echarts.init(document.getElementById('pie_chart'));
+  var radar_chart = echarts.init(document.getElementById('radar_chart'));
+  var Histogram = echarts.init(document.getElementById('histogram'));
+  var histogram_colors = ['#d14a61', '#5793f3'];
+
+  var map = new BMap.Map("l-map");
+  var house_point = new BMap.Point(house.longitude,house.latitude);
+  map.centerAndZoom(house_point, 15);
+  var marker = new BMap.Marker(house_point);
+  map.addOverlay(marker);
+  marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+  map.enableScrollWheelZoom(true);
+  //  var myGeo = new BMap.Geocoder();
+  Histogram.setOption({
+        color: histogram_colors,
+        tooltip: {
+          trigger: 'axis'
+        },
+        grid: {
+          right: '20%'
+        },
+        toolbox: {
+          feature: {
+            dataView: {show: true, readOnly: false},
+            restore: {show: true},
+            saveAsImage: {show: true}
+          }
+        },
+        legend: {
+          data: ['个数', '平均距离']
+        },
+        xAxis: [
+          {
+            type: 'category',
+            axisTick: {
+              alignWithLabel: true
+            },
+            data: ['地铁', '公交', '学校', '医院', '写字楼', '购物']
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value',
+            name: '平均距离',
+            min: 0,
+            max: 2000,
+            position: 'right',
+            axisLine: {
+              lineStyle: {
+                color: histogram_colors[0]
+              }
+            },
+            axisLabel: {
+              formatter: '{value} m'
+            }
+          },
+          {
+            type: 'value',
+            name: '个数',
+            min: 0,
+            max: 25,
+            position: 'left',
+            axisLine: {
+              lineStyle: {
+                color: histogram_colors[1]
+              }
+            },
+            axisLabel: {
+              formatter: '{value} 个'
+            }
+          }
+        ],
+        series: [
+          {
+            name: '平均距离',
+            type: 'line',
+            data: distances
+          },
+          {
+            name: '个数',
+            type: 'bar',
+            yAxisIndex: 1,
+            data: [
+              house.subway_num,
+              house.bus_num,
+              house.school_num,
+              house.hospital_num,
+              house.work_num,
+              house.shop_num]
+          }
+        ]
+      }
+  );
+
+  pie_chart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+      data: ['公交', '地铁', '学校', '医院', '写字楼', '购物']
+    },
+    series: [
+      {
+        name: '基础设施',
+        type: 'pie',
+        radius: '55%',
+        center: ['50%', '60%'],
+        data: [
+          {value: {$house.bus_num}, name: '公交'},
+          {value: {$house.subway_num}, name: '地铁'},
+          {value: {$house.school_num}, name: '学校'},
+          {value: {$house.hospital_num}, name: '医院'},
+          {value: {$house.work_num}, name: '写字楼'},
+          {value: {$house.shop_num}, name: '购物'},
+        ],
+        itemStyle: {
+          emphasis: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  });
+
+
+  radar_chart.setOption({
+    tooltip: {},
+    legend: {
+      data: ['综合得分']
+    },
+    radar: {
+      // shape: 'circle',
+      indicator: [
+        {name: '生活', max: 5},
+        {name: '交通', max: 5},
+        {name: '工作', max: 5},
+        {name: '教育', max: 5},
+        {name: '医疗', max: 5}
+      ]
+    },
+    series: [{
+      type: 'radar',
+      //areaStyle: {normal: {}},
+      data: [
+        {
+          value: [
+            evaluate(house.shop_num,distances[5],0),
+            evaluate((parseInt(house.bus_num) + parseInt(house.subway_num)),(distances[0]+distances[1])/2,1),
+            evaluate(house.work_num,distances[4],0),
+            evaluate(house.school_num,distances[2],0),
+            evaluate(house.hospital_num,distances[3],0)
+            ],
+          name: '综合得分'
+        }
+      ]
+    }]
+  });
+
+  function evaluate(num, distance,type) {
+    var result = 0;
+    if(num != 0)
+    {
+      if(type == 1)
+      {
+        result = 5.0*num/40*(1-0.5*distance/2000);
+      }
+      else
+        result = 5.0*num/20*(1-0.5*distance/1000);
+    }
+    return result;
+  }
+
+  $('#map-detail a').click(function (event) {
+    event.preventDefault();
+    var link = $(this);
+    $.scrollTo($('#nav-scroll'), 300);
+    $.ajax({
+      type: "GET",
+      url: link.attr('path'),
+      dataType: 'json',
+      success: function (data) {
+        map.centerAndZoom(house_point, 15);
+        map.clearOverlays();
+        var marker = new BMap.Marker(house_point);
+        map.addOverlay(marker);
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+
+        $.each(data, function (index, item) {
+          var point = new BMap.Point(item.longitude, item.latitude);
+//          var marker = new BMap.Marker(point);
+//          map.addOverlay(marker);
+          var maker_type = link.attr('path').split('/')[3];
+          var myIcon = new BMap.Icon("__PUBLIC__/icon/" + maker_type + ".png", new BMap.Size(25, 25));
+          var marker = new BMap.Marker(point, {icon: myIcon});  // 创建标注
+          map.addOverlay(marker);              // 将标注添加到地图中
+
+          var opts = {
+            width: 250,
+            height: 0,
+            title: item.name
+          };
+          var infoWindow = new BMap.InfoWindow("直线距离: " + item.distance + "米, 需要步行时间:" + parseFloat(item.distance / 50).toFixed(2) + "分", opts);
+          marker.addEventListener("mouseover", function () {
+            map.openInfoWindow(infoWindow, point); //开启信息窗口
+          });
+//          marker.addEventListener("mouseout", function () {
+//            map.closeInfoWindow(infoWindow, point);
+//          });
+        })
+      },
+      error: function () {
+        alert('error')
+      },
+      timeout: function () {
+        alert('time out')
+      }
+    });
+  });
+</script>
